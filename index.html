@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with KITT</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f1f1f1;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;  /* 水平居中 */
+            align-items: center;      /* 垂直居中 */
+            flex-direction: column;   /* 垂直排列 */
+            min-height: 100vh;
+            overflow-y: auto;         /* 啟用滾動條 */
+            box-sizing: border-box;
+        }
+
+        .image-container {
+            width: 100%;
+            max-width: 700px;
+            height: 300px; /* 設置聊天區域的高度 */
+            /*background-color: #fff;*/
+            border-radius: 16px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #ddd;
+            margin-top: 20px; /* 保持圖片和聊天框之間的間距 */
+        }
+
+        .image-container1 {
+            width: 100%;
+            max-width: 700px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            margin-top: 20px; /* 保持圖片和聊天框之間的間距 */
+        }
+        .uploaded-image {
+            max-width: 300px;
+            max-height: 300px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .file-upload-btn {
+            padding: 10px 20px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        .file-upload-btn:hover {
+            background-color: #357abd;
+        }
+
+        .file-name {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 700px;
+            height: 80vh; /* 設置聊天區域的高度 */
+            background-color: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #ddd;
+            margin-top: 20px; /* 保持圖片和聊天框之間的間距 */
+        }
+
+        .chat-header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 16px;
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto; /* 啟用滾動 */
+            background-color: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 75%;
+            padding: 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            line-height: 1.4;
+            word-wrap: break-word;
+            display: inline-block;
+            clear: both;
+            position: relative;
+        }
+
+        .message.user {
+            background-color: #4CAF50;
+            color: white;
+            align-self: flex-end;
+            border-bottom-left-radius: 0;
+        }
+
+        .message.bot {
+            background-color: #f1f1f1;
+            color: #333;
+            align-self: flex-start;
+            border-bottom-right-radius: 0;
+        }
+
+        .input-box {
+            display: flex;
+            padding: 10px;
+            background-color: #fff;
+            border-top: 1px solid #ddd;
+        }
+
+        .input-box textarea {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 14px;
+            outline: none;
+            resize: none;
+            height: 50px;
+        }
+
+        input[type="submit"] {
+            background-color: #4a90e2;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            
+        }
+
+        input[type="submit"]:hover {
+            background-color: #357abd;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- 顯示拍照的圖片 -->
+    <div class="image-container" style="margin: 0 auto;">
+        <img id="uploaded-image" class="uploaded-image" alt="拍攝的圖片將顯示在這裡"/>
+    </div>
+    <div class="image-container1" style="margin: 0 auto;">
+        <label for="file-upload" class="file-upload-btn" style="text-align: center;">選擇圖片</label>
+        <input type="file" id="file-upload" capture="environment" accept="image/*" style="display: none; text-align: center;"/>
+        <div id="file-name" class="file-name"></div>
+    </div>
+    
+    <div class="chat-container">
+        <div class="chat-header">
+            FruitGPT
+        </div>
+
+        <div class="chat-box" id="response">
+            <!-- 聊天內容將會顯示在這裡 -->
+        </div>
+
+        <form id="chat-form" method="POST">
+            <div class="input-box">
+                <textarea id="user_input" name="user_input" placeholder="輸入訊息..." rows="4" style="flex: 3;"></textarea>
+                <input type="submit" value="Send" >
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('chat-form').onsubmit = async function(event) {
+            event.preventDefault();
+            const user_input = document.getElementById('user_input').value;
+            const responseElement = document.getElementById('response');
+            responseElement.innerHTML = ''; // 清空之前的响应内容
+
+            const response = await fetch('/', {
+                method: 'POST',
+                body: new FormData(this),
+            });
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                responseElement.innerHTML = decoder.decode(value, { stream: true }); // 覆盖前一内容
+            }
+        }
+
+        document.getElementById('file-upload').addEventListener('change', function(event) {
+            const file = event.target.files[0]; // 獲取選擇的文件
+            if (file) {
+                const reader = new FileReader();
+
+                // 當檔案讀取完成後，顯示圖片
+                reader.onload = function(e) {
+                    const imageElement = document.getElementById('uploaded-image');
+                    imageElement.src = e.target.result;  // 設定圖片來源
+                    imageElement.style.display = 'block';  // 顯示圖片
+                };
+
+                // 讀取檔案
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html>
