@@ -21,18 +21,20 @@
         }
 
         .image-container {
-            width: 100%;
-            max-width: 700px;
-            height: 300px; /* 設置聊天區域的高度 */
-            /*background-color: #fff;*/
-            border-radius: 16px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%; /* 寬度根據畫面調整 */
+            max-width: 700px; /* 限制最大寬度 */
             display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            border: 1px solid #ddd;
-            margin-top: 20px; /* 保持圖片和聊天框之間的間距 */
+            justify-content: center; /* 水平居中 */
+            align-items: center; /* 垂直居中 */
+            margin: 20px auto; /* 保持垂直與水平居中 */
+            padding: 10px; /* 增加內邊距 */
+            /*border: 1px solid #ddd;*/
+            /*border-radius: 16px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #fff; /* 給圖片區域添加背景色 */
+            overflow: hidden; /* 確保溢出內容不會影響樣式 */
         }
+
 
         .image-container1 {
             width: 100%;
@@ -42,14 +44,15 @@
             flex-direction: column;
             overflow: hidden;
             margin-top: 20px; /* 保持圖片和聊天框之間的間距 */
+            margin: 20px auto; /* 垂直與水平居中 */
         }
         .uploaded-image {
-            max-width: 300px;
-            max-height: 300px;
-            border-radius: 8px;
-            margin-top: 20px;
-            display: none;
+            max-width: 100%; /* 確保圖片寬度不超過容器 */
+            max-height: 100%; /* 確保圖片高度不超過容器 */
+            display: block; /* 保持圖片為塊狀元素 */
+            object-fit: contain; /* 適應容器大小，避免裁切 */
         }
+
 
         .file-upload-btn {
             padding: 10px 20px;
@@ -74,7 +77,7 @@
         .chat-container {
             width: 100%;
             max-width: 700px;
-            height: 80vh; /* 設置聊天區域的高度 */
+            height: 50vh; /* 設置聊天區域的高度 */
             background-color: #fff;
             border-radius: 16px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -170,7 +173,7 @@
 <body>
     <!-- 顯示拍照的圖片 -->
     <div class="image-container" style="margin: 0 auto;">
-        <img id="uploaded-image" class="uploaded-image" alt="拍攝的圖片將顯示在這裡"/>
+        <img id="uploaded-image" class="uploaded-image" alt=""/>
     </div>
     <div class="image-container1" style="margin: 0 auto;">
         <label for="file-upload" class="file-upload-btn" style="text-align: center;">選擇圖片</label>
@@ -203,8 +206,8 @@
             responseElement.innerHTML = ''; // 清空之前的响应内容
 
             const response = await fetch('/', {
-                method: 'POST',
-                body: new FormData(this),
+                method: 'POST', // 確保方法是 POST
+                body: new FormData(document.getElementById('chat-form'))
             });
 
             const reader = response.body.getReader();
@@ -217,21 +220,28 @@
         }
 
         document.getElementById('file-upload').addEventListener('change', function(event) {
-            const file = event.target.files[0]; // 獲取選擇的文件
-            if (file) {
-                const reader = new FileReader();
+        const file = event.target.files[0]; // 獲取選擇的文件
+        if (file) {
+            const reader = new FileReader();
 
-                // 當檔案讀取完成後，顯示圖片
-                reader.onload = function(e) {
-                    const imageElement = document.getElementById('uploaded-image');
-                    imageElement.src = e.target.result;  // 設定圖片來源
-                    imageElement.style.display = 'block';  // 顯示圖片
+            // 當檔案讀取完成後，顯示圖片並調整容器
+            reader.onload = function(e) {
+                const imageElement = document.getElementById('uploaded-image');
+                imageElement.src = e.target.result;  // 設定圖片來源
+                imageElement.style.display = 'block';  // 顯示圖片
+                
+                // 動態調整容器大小
+                const container = document.querySelector('.image-container');
+                imageElement.onload = () => {
+                    container.style.height = `${imageElement.offsetHeight}px`; // 自動調整高度
                 };
+            };
 
-                // 讀取檔案
-                reader.readAsDataURL(file);
-            }
-        });
+            // 讀取檔案
+            reader.readAsDataURL(file);
+        }
+    });
+
     </script>
 </body>
 </html>
