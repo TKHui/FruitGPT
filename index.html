@@ -205,7 +205,7 @@
             const responseElement = document.getElementById('response');
             responseElement.innerHTML = ''; // 清空之前的响应内容
 
-            const response = await fetch('/', {
+            const response = await fetch('http://192.168.1.100:5000/', {
                 method: 'POST', // 確保方法是 POST
                 body: new FormData(document.getElementById('chat-form'))
             });
